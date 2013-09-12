@@ -37,6 +37,11 @@ sub Ret
     print "<prv_txn_date>$txn_date</prv_txn_date>\n" if $txn_date && $_[0] == 0;
     print "\t<sum>" . $cgi->param('sum') . "</sum>\n" if $cgi->param('sum');
     print "\t<result>$_[0]</result>\n";
+    if (defined($_[2])) {
+      print "\t<fields>\n";
+      print "\t\t<field1 name=\"fio\">" . $_[2] . "</field1>\n";
+      print "\t</fields>\n";
+    }
     print "</response>\n";
     exit;
 }
@@ -71,7 +76,7 @@ $dbh=DBI->connect("DBI:mysql:database=$db_name;host=$db_server;mysql_connect_tim
 
 $p=&sql_select_line($dbh,"SELECT * FROM users WHERE id='$mid' AND mid='0'");
 &Ret(2, 'Account not found: ' . $account) unless $p;
-&Ret(0, 'Account exist: ' . $account) if $command eq 'check';
+&Ret(0, 'Account exist: ' . $account, $p->{fio}) if $command eq 'check';
 
 $txn_date = $cgi->param('txn_date');
 &Ret(2, 'Wrong txn_date: ' . $txn_date) unless ($txn_date=~/^(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)$/);
