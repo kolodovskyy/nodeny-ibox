@@ -72,7 +72,7 @@ require $call_pl;
 $dbh=DBI->connect("DBI:mysql:database=$db_name;host=$db_server;mysql_connect_timeout=$mysql_connect_timeout;",
 		  $user,$pw,{PrintError=>1});
 &Ret(503, 'Could not connect to database') unless $dbh;
-&SetCharSet($dbh);
+$dbh->do('SET NAMES UTF8');
 
 $p=&sql_select_line($dbh,"SELECT * FROM users WHERE id='$mid' AND mid='0'");
 &Ret(2, 'Account not found: ' . $account) unless $p;
