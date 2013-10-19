@@ -102,4 +102,4 @@ $sum_ok && $dbh->do("INSERT INTO pays SET
 $sum_ok && $dbh->do("UPDATE users SET state='on', balance=balance+$sum WHERE id='$mid'");
 $sum_ok && $dbh->do("UPDATE users SET state='on' WHERE mid='$mid'");
 
-&Ret(0, "Pay added to billing account:$account txn_id:$id_payment txn_date:$txn_date sum:$sum" . ($sum_ok ? '' : " (WANRING: sum is 0)"));
+&Ret(0, "Pay added to billing account:$account txn_id:$txn_id txn_date:$txn_date sum:$sum" . ($sum_ok ? '' : " (WARNING: sum is 0)"));
