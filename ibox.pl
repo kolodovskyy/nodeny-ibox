@@ -11,7 +11,7 @@ use DBI;
 use CGI;
 
 $main_config = '/usr/local/nodeny/nodeny.cfg.pl';
-$call_pl = "/usr/local/nodeny/web/calls.pl";
+$call_pl = '/usr/local/nodeny/web/calls.pl';
 $log_file='/usr/local/nodeny/module/ibox.log';
 
 $category = '94';
@@ -40,6 +40,7 @@ sub Ret
   if (defined($_[2])) {
     print "\t<fields>\n";
     print "\t\t<field1 name=\"fio\">" . $_[2] . "</field1>\n";
+    print "\t\t<field2 name=\"balance\">" . $_[3] . "</field2>\n";
     print "\t</fields>\n";
   }
   print "</response>\n";
@@ -73,9 +74,30 @@ $dbh=DBI->connect("DBI:mysql:database=$db_name;host=$db_server;mysql_connect_tim
 &Ret(503, 'Could not connect to database') unless $dbh;
 $dbh->do('SET NAMES UTF8');
 
-$p=&sql_select_line($dbh,"SELECT * FROM users WHERE id='$mid' AND mid='0'");
+
+$p = &sql_select_line($dbh, "SELECT
+  u.fio as fio,
+  u.balance as balance,
+  p.price as abonplata,
+  u.srvs as srvs
+  FROM users u, plans2 p
+  WHERE u.paket=p.id AND u.id='$mid' AND u.mid='0'");
+
 &Ret(2, 'Account not found: ' . $account) unless $p;
-&Ret(0, 'Account exist: ' . $account, $p->{fio}) if $command eq 'check';
+
+if ($command eq 'check') {
+  # services
+  $srvs_sum = 0;
+  $sr = $p->{srvs};
+  if (!($p->{srvs} & 0x80000000)) {
+    for ($i=1;$i<32;$i++,$sr>>=1) {
+      next unless $srv_n[$i];
+      next if !($sr & 1);
+      $srvs_sum+=$srv_p[$i];
+    }
+  }
+  &Ret(0, 'Account exist: ' . $account, $p->{fio}, ($p->{balance} - $p->{abonplata} - $srvs_sum));
+}
 
 $txn_date = $cgi->param('txn_date');
 &Ret(2, 'Wrong txn_date: ' . $txn_date) unless ($txn_date=~/^(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)$/);
