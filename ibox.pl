@@ -18,32 +18,32 @@ $category = '94';
 
 sub Log
 {
-    my ($time);
-    open LOG, ">>$log_file";
-    $time = CORE::localtime;
-    print LOG "$time: $_[0]\n";
-    close LOG;
+  my ($time);
+  open LOG, ">>$log_file";
+  $time = CORE::localtime;
+  print LOG "$time: $_[0]\n";
+  close LOG;
 }
 
 sub Ret
 {
-    $id_pay = 0 if !$id_pay;
-    &Log($_[1]) if $_[1];
-    print "Content-type: text/xml\n\n";
-    print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-    print "<response>\n";
-    print "\t<ibox_txn_id>" . $cgi->param('txn_id') . "</ibox_txn_id>\n" if $cgi->param('txn_id');
-    print "\t<prv_txn>" . time . "</prv_txn>\n" if $cgi->param('command') eq 'pay' && $_[0] == 0;
-    print "<prv_txn_date>$txn_date</prv_txn_date>\n" if $txn_date && $_[0] == 0;
-    print "\t<sum>" . $cgi->param('sum') . "</sum>\n" if $cgi->param('sum');
-    print "\t<result>$_[0]</result>\n";
-    if (defined($_[2])) {
-      print "\t<fields>\n";
-      print "\t\t<field1 name=\"fio\">" . $_[2] . "</field1>\n";
-      print "\t</fields>\n";
-    }
-    print "</response>\n";
-    exit;
+  $id_pay = 0 if !$id_pay;
+  &Log($_[1]) if $_[1];
+  print "Content-type: text/xml\n\n";
+  print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  print "<response>\n";
+  print "\t<ibox_txn_id>" . $cgi->param('txn_id') . "</ibox_txn_id>\n" if $cgi->param('txn_id');
+  print "\t<prv_txn>" . time . "</prv_txn>\n" if $cgi->param('command') eq 'pay' && $_[0] == 0;
+  print "<prv_txn_date>$txn_date</prv_txn_date>\n" if $txn_date && $_[0] == 0;
+  print "\t<sum>" . $cgi->param('sum') . "</sum>\n" if $cgi->param('sum');
+  print "\t<result>$_[0]</result>\n";
+  if (defined($_[2])) {
+    print "\t<fields>\n";
+    print "\t\t<field1 name=\"fio\">" . $_[2] . "</field1>\n";
+    print "\t</fields>\n";
+  }
+  print "</response>\n";
+  exit;
 }
 
 $cgi=new CGI;
@@ -69,8 +69,7 @@ require $main_config;
 &Ret(1, 'Call.pl not found') unless -e $call_pl;
 require $call_pl;
 
-$dbh=DBI->connect("DBI:mysql:database=$db_name;host=$db_server;mysql_connect_timeout=$mysql_connect_timeout;",
-		  $user,$pw,{PrintError=>1});
+$dbh=DBI->connect("DBI:mysql:database=$db_name;host=$db_server;mysql_connect_timeout=$mysql_connect_timeout;", $user,$pw,{PrintError=>1});
 &Ret(503, 'Could not connect to database') unless $dbh;
 $dbh->do('SET NAMES UTF8');
 
@@ -87,18 +86,18 @@ $pp = &sql_select_line($dbh, "SELECT * FROM pays WHERE category='$category' AND 
 
 $sum_ok = $sum > 0 ? 1 : 0;
 
-$sum_ok && $dbh->do("INSERT INTO pays SET 
-    mid='$mid',
-    cash='$sum',
-    time=UNIX_TIMESTAMP('$txn_date'),
-    admin_id=0,
-    admin_ip=0,
-    office=0,
-    bonus='y',
-    reason='$txn_id',
-    coment='IBOX ($txn_id)',
-    type=10,
-    category=$category");
+$sum_ok && $dbh->do("INSERT INTO pays SET
+  mid='$mid',
+  cash='$sum',
+  time=UNIX_TIMESTAMP('$txn_date'),
+  admin_id=0,
+  admin_ip=0,
+  office=0,
+  bonus='y',
+  reason='$txn_id',
+  coment='IBOX ($txn_id)',
+  type=10,
+  category=$category");
 $sum_ok && $dbh->do("UPDATE users SET state='on', balance=balance+$sum WHERE id='$mid'");
 $sum_ok && $dbh->do("UPDATE users SET state='on' WHERE mid='$mid'");
 
