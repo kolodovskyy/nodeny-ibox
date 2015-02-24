@@ -96,7 +96,7 @@ if ($command eq 'check') {
       $srvs_sum+=$srv_p[$i];
     }
   }
-  &Ret(0, 'Account exist: ' . $account, $p->{fio}, ($p->{balance} - $p->{abonplata} - $srvs_sum));
+  &Ret(0, 'Account exist: ' . $account, $p->{fio}, sprintf("%01.2f", $p->{balance} - $p->{abonplata} - $srvs_sum));
 }
 
 $txn_date = $cgi->param('txn_date');
